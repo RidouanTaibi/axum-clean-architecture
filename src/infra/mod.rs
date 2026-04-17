@@ -1,5 +1,5 @@
 use crate::{
-    adapters::{crypto::argon2::ArgonPasswordHasher, persistence::PostgresPersistence},
+    adapters::{crypto::argon2::ArgonPasswordHasher, repository::PostgresPersistence},
     infra::db::init_db,
 };
 

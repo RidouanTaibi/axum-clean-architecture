@@ -5,7 +5,7 @@ use argon2::{
 
 use crate::{
     app_error::{AppError, AppResult},
-    core::user::UserCredentialHasher,
+    core::user::UserCredentialsHasher,
 };
 
 #[derive(Default)]
@@ -13,14 +13,15 @@ pub struct ArgonPasswordHasher {
     hasher: Argon2<'static>,
 }
 
-impl UserCredentialHasher for ArgonPasswordHasher {
+impl UserCredentialsHasher for ArgonPasswordHasher {
     fn hash_password(&self, password: &str) -> AppResult<String> {
         let salt = SaltString::generate(&mut OsRng);
         let hash = self
             .hasher
             .hash_password(password.as_bytes(), &salt)
-            .map_err(|_| AppError::internal("Password hashing failed".into()))?
+            .map_err(|_| AppError::Internal("Password hashing failed.".into()))?
             .to_string();
+
         Ok(hash)
     }
 }

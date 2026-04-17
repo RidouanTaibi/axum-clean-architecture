@@ -7,7 +7,7 @@ use crate::{
     adapters::repository::PostgresPersistence,
     app_error::{AppError, AppResult},
     entities::user::User,
-    use_cases::user::UserPersistence,
+    core::user::UserRepository,
 };
 
 // User struct as stored in the db.
@@ -15,6 +15,7 @@ use crate::{
 pub struct UserDb {
     pub id: Uuid,
     pub username: String,
+    pub email: String,
     pub password_hash: String,
     pub created_at: NaiveDateTime,
 }
@@ -24,14 +25,15 @@ impl From<UserDb> for User {
         User {
             id: user_db.id,
             username: user_db.username,
+            email: user_db.email,
             password_hash: user_db.password_hash,
-            created_at: user_db.created_at,
+            created_at: user_db.created_at.and_utc(),
         }
     }
 }
 
 #[async_trait]
-impl UserPersistence for PostgresPersistence {
+impl UserRepository for PostgresPersistence {
     async fn create_user(&self, username: &str, email: &str, password_hash: &str) -> AppResult<()> {
         let uuid = Uuid::new_v4();
 

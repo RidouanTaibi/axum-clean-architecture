@@ -6,8 +6,9 @@ use serde::{Deserialize, Serialize};
 use tracing::{info, instrument};
 
 use crate::{
-    adapters::http::app_state::AppState, app_error::AppResult, use_cases::user::UserUseCases,
+    adapters::http::app_state::AppState, app_error::AppResult, core::user::UserService,
 };
+
 
 pub fn router() -> Router<AppState> {
     Router::new().route("/register", post(register))
@@ -28,12 +29,12 @@ struct RegisterResponse {
 /// Creates a new user based on the submitted credentials.
 #[instrument(skip(user_use_cases))]
 async fn register(
-    State(user_use_cases): State<Arc<UserUseCases>>,
+    State(user_use_cases): State<Arc<UserService>>,
     Json(payload): Json<RegisterPayload>,
 ) -> AppResult<impl IntoResponse> {
     info!("Register user called");
     user_use_cases
-        .add(&payload.username, &payload.email, &payload.password)
+        .register_user(&payload.username, &payload.email, &payload.password)
         .await?;
 
     Ok((

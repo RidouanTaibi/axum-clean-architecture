@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use secrcy::{SecretString, exposeSecret};
+use secrecy::{ExposeSecret, SecretString};
 use tracing::{info, instrument};
 
 use crate::app_error::AppResult;
@@ -16,18 +16,18 @@ pub trait UserRepository: Send + Sync {
     ) -> AppResult<()>;
 }
 
-pub trait UserCredentialHasher: Send + Sync {
+pub trait UserCredentialsHasher: Send + Sync {
     fn hash_password(&self, password: &str) -> AppResult<String>;
 }
 
 #[derive(Clone)]
 pub struct UserService {
-    hasher: Arc<dyn UserCredentialHasher>,
+    hasher: Arc<dyn UserCredentialsHasher>,
     repository: Arc<dyn UserRepository>,
 }
 
 impl UserService {
-    pub fn new(hasher: Arc<dyn UserCredentialHasher>, repository: Arc<dyn UserRepository>) -> Self {
+    pub fn new(hasher: Arc<dyn UserCredentialsHasher>, repository: Arc<dyn UserRepository>) -> Self {
         Self { hasher, repository }
     }
 
@@ -40,10 +40,13 @@ impl UserService {
     ) -> AppResult<()> {
         info!("Registering user: {}", username);
 
-        let hashed_password = self.hasher.hash_password(exposeSecret(&password))?;
-        self.repository
-            .create_user(username, email, &hashed_password)
-            .await?;
+        let hash = &self.hasher.hash_password(password.expose_secret())?;
+        self.repository.create_user(username, email, hash).await?;
+
+        // let hashed_password = self.hasher.hash_password(exposeSecret(&password))?;
+        // self.repository
+        //     .create_user(username, email, &hashed_password)
+        //     .await?;
         info!("User registered successfully");
         Ok(())
     }

@@ -1,7 +1,7 @@
 use crate::{
     adapters::http::app_state::AppState,
     infra::{argon2_password_hasher, config::AppConfig, postgres_persistence},
-    core::user::UserRepository,
+    core::user::UserService,
 };
 use std::fs::File;
 use std::sync::Arc;
@@ -13,7 +13,7 @@ pub async fn init_app_state() -> anyhow::Result<AppState> {
     let postgres_arc = Arc::new(postgres_persistence().await?);
     let argon_hasher = argon2_password_hasher();
 
-    let user_use_cases = UserRepository::new(Arc::new(argon_hasher), postgres_arc.clone());
+    let user_use_cases = UserService::new(Arc::new(argon_hasher), postgres_arc.clone());
 
     Ok(AppState {
         config: Arc::new(config),
