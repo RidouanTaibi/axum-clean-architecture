@@ -1,2 +1,3 @@
-pub mod page;
+pub mod tenant;
 pub mod user;
+pub mod page;

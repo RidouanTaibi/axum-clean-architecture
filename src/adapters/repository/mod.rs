@@ -2,7 +2,9 @@ use sqlx::PgPool;
 
 use crate::app_error::AppError;
 
+pub mod tenant;
 pub mod user;
+pub mod page;
 
 #[derive(Clone)]
 pub struct PostgresPersistence {

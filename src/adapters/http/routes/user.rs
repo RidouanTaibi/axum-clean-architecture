@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{Json, Router, extract::State, http::StatusCode, response::IntoResponse, routing::post};
+use axum::{Json, Router, extract::State, http::StatusCode, response::IntoResponse, routing::post, routing::get};
 use secrecy::SecretString;
 use serde::{Deserialize, Serialize};
 use tracing::{info, instrument};
