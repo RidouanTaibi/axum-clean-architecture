@@ -25,6 +25,7 @@ target
 
 /target
 *.log
+*.env
 .env
 .env.test
 Cargo.lock
