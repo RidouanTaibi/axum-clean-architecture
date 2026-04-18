@@ -15,10 +15,7 @@ pub struct Tenant {
 
 #[async_trait]
 pub trait TenantRepository: Send + Sync {
-    async fn create_tenant(
-        &self, 
-        name: &str
-    ) -> AppResult<()>;
+    async fn create_tenant(&self, name: &str) -> AppResult<()>;
 
     async fn list_tenants(&self) -> AppResult<Vec<Tenant>>;
 }
@@ -34,10 +31,7 @@ impl TenantService {
     }
 
     #[instrument(skip(self))]
-    pub async fn create_tenant(
-        &self, 
-        name: &str
-    ) -> AppResult<()> {
+    pub async fn create_tenant(&self, name: &str) -> AppResult<()> {
         info!("Creating tenant: {}", name);
         self.repository.create_tenant(name).await?;
         info!("Tenant created successfully");

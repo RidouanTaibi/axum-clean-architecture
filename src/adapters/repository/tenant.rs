@@ -1,12 +1,13 @@
 use async_trait::async_trait;
+use chrono::NaiveDateTime;
 use serde::Serialize;
 use uuid::Uuid;
 
 use crate::{
     adapters::repository::PostgresPersistence,
     app_error::{AppError, AppResult},
-    entities::tenant::Tenant,
     core::tenant::TenantRepository,
+    entities::tenant::Tenant,
 };
 
 // Tenant struct as stored in the db.
@@ -31,10 +32,7 @@ impl From<TenantDb> for Tenant {
 
 #[async_trait]
 impl TenantRepository for PostgresPersistence {
-    async fn create_tenant(
-        &self, 
-        name: &str
-    ) -> AppResult<()> {
+    async fn create_tenant(&self, name: &str) -> AppResult<()> {
         let uuid = Uuid::new_v4();
 
         sqlx::query!(
@@ -50,15 +48,19 @@ impl TenantRepository for PostgresPersistence {
         Ok(())
     }
 
-    async fn list_tenants(&self) -> AppResult<Vec<Tenant>> {
-        let rows = sqlx::query_as!(
-            TenantDb,
-            "SELECT id, uuid, name, created_at FROM tenants"
-        )
-        .fetch_all(&self.pool)
-        .await
-        .map_err(AppError::from)?;
+    async fn list_tenants(&self) -> AppResult<Vec<crate::core::tenant::Tenant>> {
+        let tenants =
+            sqlx::query_as::<_, TenantDb>("SELECT id, uuid, name, created_at FROM tenants")
+                .fetch_all(&self.pool)
+                .await
+                .map_err(AppError::from)?;
 
-        Ok(rows.into_iter().map(Tenant::from).collect())
+        Ok(tenants
+            .into_iter()
+            .map(|t| crate::core::tenant::Tenant {
+                id: t.id,
+                name: t.name,
+            })
+            .collect())
     }
 }
